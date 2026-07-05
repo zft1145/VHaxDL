@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>跳转中...</title>
+</head>
+<body>
+    <script>
+        fetch('/api/link')
+            .then(r => r.json())
+            .then(data => {
+                if (data.url) {
+                    window.location.href = data.url;
+                } else {
+                    document.body.textContent = '未设置链接';
+                }
+            })
+            .catch(() => {
+                document.body.textContent = '加载失败';
+            });
+    </script>
+</body>
+</html>
