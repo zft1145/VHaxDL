@@ -2,35 +2,25 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>链接管理</title>
+    <title>Admin - 修改链接</title>
 </head>
 <body>
     <h3>修改跳转链接</h3>
-    <input id="url" placeholder="https://example.com" style="width:400px;padding:8px;">
-    <button onclick="save()" style="padding:8px 20px;margin-left:10px;">保存</button>
-    <p id="msg" style="margin-top:15px;"></p>
-    
+    <input id="url" placeholder="https://example.com" style="width:350px;padding:8px;font-size:16px;">
+    <button onclick="save()" style="padding:8px 20px;font-size:16px;cursor:pointer;">保存</button>
+    <p id="msg" style="margin-top:12px;color:#0a0;"></p>
+    <hr style="margin:20px 0;">
+    <p>当前链接：<span id="current" style="color:#06f;"></span></p>
+
     <script>
-        // 加载当前链接
-        fetch('/api/link')
-            .then(r => r.json())
-            .then(data => {
-                if (data.url) {
-                    document.getElementById('url').value = data.url;
-                }
-            })
-            .catch(() => {
-                document.getElementById('msg').textContent = '加载当前链接失败';
-            });
+        // 改成你的 Worker 域名
+        const API_BASE = 'https://vhaxdlapi.zft1145.top';
 
         function save() {
             const url = document.getElementById('url').value.trim();
-            if (!url) {
-                alert('请输入链接');
-                return;
-            }
-            
-            fetch('/api/link', {
+            if (!url) return alert('请输入链接');
+            document.getElementById('msg').textContent = '保存中...';
+            fetch(API_BASE + '/api/link', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url })
@@ -39,17 +29,30 @@
             .then(data => {
                 if (data.message) {
                     document.getElementById('msg').textContent = '✅ ' + data.message;
-                    document.getElementById('msg').style.color = 'green';
-                } else if (data.error) {
-                    document.getElementById('msg').textContent = '❌ ' + data.error;
-                    document.getElementById('msg').style.color = 'red';
+                    document.getElementById('current').textContent = url;
+                } else {
+                    document.getElementById('msg').textContent = '❌ ' + (data.error || '保存失败');
                 }
             })
             .catch(() => {
-                document.getElementById('msg').textContent = '❌ 保存失败，请重试';
-                document.getElementById('msg').style.color = 'red';
+                document.getElementById('msg').textContent = '❌ 网络错误';
             });
         }
+
+        // 加载当前链接
+        fetch(API_BASE + '/api/link')
+            .then(r => r.json())
+            .then(data => {
+                if (data.url) {
+                    document.getElementById('url').value = data.url;
+                    document.getElementById('current').textContent = data.url;
+                } else {
+                    document.getElementById('current').textContent = '(未设置)';
+                }
+            })
+            .catch(() => {
+                document.getElementById('current').textContent = '(加载失败)';
+            });
     </script>
 </body>
 </html>
