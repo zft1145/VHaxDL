@@ -1,5 +1,5 @@
 name = "vhaxdlapi"
-main = "worker.js"
+main = "worker.js"              # 改成这样，指向 worker 目录下的 worker.js
 compatibility_date = "2024-12-18"
 
 [[kv_namespaces]]
