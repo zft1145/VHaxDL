@@ -5,18 +5,32 @@
     <title>跳转中...</title>
 </head>
 <body>
+    <p style="font-family:sans-serif;text-align:center;margin-top:60px;color:#666;">正在跳转...</p>
     <script>
-        fetch('/api/link')
+        const API_BASE = 'https://vhaxdlapi.workers.dev';
+        
+        fetch(API_BASE + '/api/link')
             .then(r => r.json())
             .then(data => {
                 if (data.url) {
                     window.location.href = data.url;
                 } else {
-                    document.body.textContent = '未设置链接';
+                    document.body.innerHTML = `
+                        <div style="font-family:sans-serif;text-align:center;margin-top:60px;">
+                            <h2>⚠️ 未设置跳转链接</h2>
+                            <p>请访问 <a href="/admin.html">/admin.html</a> 设置</p>
+                        </div>
+                    `;
                 }
             })
             .catch(() => {
-                document.body.textContent = '加载失败';
+                document.body.innerHTML = `
+                    <div style="font-family:sans-serif;text-align:center;margin-top:60px;color:#c00;">
+                        <h2>❌ 加载失败</h2>
+                        <p>请检查 Worker 是否正常运行</p>
+                        <p style="color:#999;font-size:14px;">API: ${API_BASE}</p>
+                    </div>
+                `;
             });
     </script>
 </body>
