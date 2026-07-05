@@ -6,20 +6,27 @@
 </head>
 <body>
     <h3>修改跳转链接</h3>
-    <input id="url" placeholder="https://example.com" style="width:350px;padding:8px;font-size:16px;">
-    <button onclick="save()" style="padding:8px 20px;font-size:16px;cursor:pointer;">保存</button>
-    <p id="msg" style="margin-top:12px;color:#0a0;"></p>
-    <hr style="margin:20px 0;">
+    <p style="color:#666;font-size:14px;">API 地址：<span id="apiUrl" style="color:#06f;"></span></p>
+    <input id="url" placeholder="https://example.com" style="width:400px;padding:10px;font-size:16px;">
+    <button onclick="save()" style="padding:10px 24px;font-size:16px;cursor:pointer;">保存</button>
+    <p id="msg" style="margin-top:12px;"></p>
+    <hr>
     <p>当前链接：<span id="current" style="color:#06f;"></span></p>
+    <button onclick="loadLink()" style="padding:6px 16px;cursor:pointer;">刷新</button>
 
     <script>
-        // 改成你的 Worker 域名
-        const API_BASE = 'https://vhaxdlapi.zft1145.top';
+        // 直接用 Worker 的 IP 或 workers.dev 域名
+        const API_BASE = 'https://vhaxdlapi.workers.dev';
+
+        document.getElementById('apiUrl').textContent = API_BASE;
 
         function save() {
             const url = document.getElementById('url').value.trim();
             if (!url) return alert('请输入链接');
-            document.getElementById('msg').textContent = '保存中...';
+            const msg = document.getElementById('msg');
+            msg.textContent = '⏳ 保存中...';
+            msg.style.color = '#f90';
+            
             fetch(API_BASE + '/api/link', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -28,31 +35,129 @@
             .then(r => r.json())
             .then(data => {
                 if (data.message) {
-                    document.getElementById('msg').textContent = '✅ ' + data.message;
+                    msg.textContent = '✅ ' + data.message;
+                    msg.style.color = '#0a0';
                     document.getElementById('current').textContent = url;
                 } else {
-                    document.getElementById('msg').textContent = '❌ ' + (data.error || '保存失败');
+                    msg.textContent = '❌ ' + (data.error || '保存失败');
+                    msg.style.color = '#c00';
                 }
             })
-            .catch(() => {
-                document.getElementById('msg').textContent = '❌ 网络错误';
+            .catch(err => {
+                msg.textContent = '❌ 网络错误：' + err.message;
+                msg.style.color = '#c00';
             });
         }
 
-        // 加载当前链接
-        fetch(API_BASE + '/api/link')
+        function loadLink() {
+            const msg = document.getElementById('msg');
+            msg.textContent = '⏳ 加载中...';
+            msg.style.color = '#f90';
+            
+            fetch(API_BASE + '/api/link')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.url) {
+                        document.getElementById('url').value = data.url;
+                        document.getElementById('current').textContent = data.url;
+                        msg.textContent = '✅ 加载成功';
+                        msg.style.color = '#0a0';
+                    } else {
+                        document.getElementById('current').textContent = '(未设置)';
+                        msg.textContent = '⚠️ 未设置链接';
+                        msg.style.color = '#f90';
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('current').textContent = '(加载失败)';
+                    msg.textContent = '❌ 加载失败：' + err.message;
+                    msg.style.color = '#c00';
+                });
+        }
+
+        // 页面加载时自动获取
+        loadLink();
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - 修改链接</title>
+</head>
+<body>
+    <h3>修改跳转链接</h3>
+    <p style="color:#666;font-size:14px;">API 地址：<span id="apiUrl" style="color:#06f;"></span></p>
+    <input id="url" placeholder="https://example.com" style="width:400px;padding:10px;font-size:16px;">
+    <button onclick="save()" style="padding:10px 24px;font-size:16px;cursor:pointer;">保存</button>
+    <p id="msg" style="margin-top:12px;"></p>
+    <hr>
+    <p>当前链接：<span id="current" style="color:#06f;"></span></p>
+    <button onclick="loadLink()" style="padding:6px 16px;cursor:pointer;">刷新</button>
+
+    <script>
+        // 直接用 Worker 的 IP 或 workers.dev 域名
+        const API_BASE = 'https://vhaxdlapi.workers.dev';
+
+        document.getElementById('apiUrl').textContent = API_BASE;
+
+        function save() {
+            const url = document.getElementById('url').value.trim();
+            if (!url) return alert('请输入链接');
+            const msg = document.getElementById('msg');
+            msg.textContent = '⏳ 保存中...';
+            msg.style.color = '#f90';
+            
+            fetch(API_BASE + '/api/link', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url })
+            })
             .then(r => r.json())
             .then(data => {
-                if (data.url) {
-                    document.getElementById('url').value = data.url;
-                    document.getElementById('current').textContent = data.url;
+                if (data.message) {
+                    msg.textContent = '✅ ' + data.message;
+                    msg.style.color = '#0a0';
+                    document.getElementById('current').textContent = url;
                 } else {
-                    document.getElementById('current').textContent = '(未设置)';
+                    msg.textContent = '❌ ' + (data.error || '保存失败');
+                    msg.style.color = '#c00';
                 }
             })
-            .catch(() => {
-                document.getElementById('current').textContent = '(加载失败)';
+            .catch(err => {
+                msg.textContent = '❌ 网络错误：' + err.message;
+                msg.style.color = '#c00';
             });
+        }
+
+        function loadLink() {
+            const msg = document.getElementById('msg');
+            msg.textContent = '⏳ 加载中...';
+            msg.style.color = '#f90';
+            
+            fetch(API_BASE + '/api/link')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.url) {
+                        document.getElementById('url').value = data.url;
+                        document.getElementById('current').textContent = data.url;
+                        msg.textContent = '✅ 加载成功';
+                        msg.style.color = '#0a0';
+                    } else {
+                        document.getElementById('current').textContent = '(未设置)';
+                        msg.textContent = '⚠️ 未设置链接';
+                        msg.style.color = '#f90';
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('current').textContent = '(加载失败)';
+                    msg.textContent = '❌ 加载失败：' + err.message;
+                    msg.style.color = '#c00';
+                });
+        }
+
+        // 页面加载时自动获取
+        loadLink();
     </script>
 </body>
 </html>
